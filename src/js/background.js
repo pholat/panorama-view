@@ -13,6 +13,7 @@ var openingView = false;
 var openingBackup = false;
 
 async function triggerCommand(command) {
+    console.log(`command: ${command}`)
 	if (command === "activate-next-group") {
 		const windowId = (await browser.windows.getCurrent()).id;
 		const groups = await browser.sessions.getWindowValue(windowId, 'groups');
@@ -26,8 +27,23 @@ async function triggerCommand(command) {
 
 		await toggleVisibleTabs(activeGroup, true);
 	}else if (command === "toggle-panorama-view") {
-		toggleView();
-	}
+        toggleView();
+    } else if ( command === "activate-grup-id") {
+		const windowId = (await browser.windows.getCurrent()).id;
+        var currentTab = (await browser.tabs.query({active: true, currentWindow: true}))[0];
+		var groups = await browser.sessions.getWindowValue(windowId, 'groups');
+        var names = [];
+        for ( var i in groups ) {
+            console.log(`adding: ${groups[i].id}, ${groups[i].name}`)
+            names.push({"id":groups[i].id, "name":groups[i].name});
+        }
+        browser.tabs.sendMessage(
+            currentTab.id, {"type":"notify", "value":names} 
+        ).then(
+            function(message) {console.log(`success: ${message}`)},
+            function(error)   {console.log(`error: ${error}`)}
+        );
+    }
 }
 
 /** Open the Panorama View tab, or return to the last open tab if Panorama View is currently open */
@@ -244,6 +260,13 @@ async function salvageGrouplessTabs() {
 	}
 }
 
+var id=0;
+
+function recipient(message, sender, sendResponse) {
+    console.log(message.value);
+    sendResponse("");
+}
+
 async function init() {
 
 	await setupWindows();
@@ -258,6 +281,8 @@ async function init() {
 	browser.tabs.onAttached.addListener(tabAttached);
 	browser.tabs.onDetached.addListener(tabDetached);
 	browser.tabs.onActivated.addListener(tabActivated);
+    browser.runtime.onMessage.addListener(recipient);
+    console.log("START")
 }
 
 init();

@@ -18,6 +18,12 @@
 	},
 
 	"commands": {
+		"activate-grup-id": {
+			"suggested_key": {
+				"default": "Ctrl+Shift+B"
+			},
+			"description": "Activate by id prompt"
+		},
 		"toggle-panorama-view": {
 			"suggested_key": {
 				"default": "Ctrl+Shift+F"
@@ -31,7 +37,21 @@
 			"description": "Activate the next Tab Group"
 		}
 	},
-
+    "content_scripts": [
+        {
+            "matches": [
+                "<all_urls>"
+            ],
+            "js": [
+                "js/content.js"
+            ],
+            "run_at": "document_start",
+            "match_about_blank": true
+        }
+    ],
+	"web_accessible_resources": [                                                                                                                                       
+	    "static/cmdline.html"
+    ],
 	"background": {
 		"scripts": ["js/background.js"]
 	},
